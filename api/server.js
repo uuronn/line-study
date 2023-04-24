@@ -20,70 +20,18 @@ try {
 
     const $ = cheerio.load(body);
 
-    // console.log("正常かどうか", res.ok);
-    // console.log("body:", body);
-    // console.log("$ｄｄｄ:", $("p"));
-
     $("li").each((i, elem) => {
-      // console.log("elm", elem);
-
-      //'m_unit'クラス内のh3タグ内要素に対して処理実行
-      titles_arr[i] = $(elem).text(); //配列にタイトルを挿入していく
-
-      // console.log("titles_araaar", titles_arr[i]);
+      titles_arr[i] = $(elem).text();
     });
   })();
 } catch (e) {
   console.log(e);
 }
 
-// request(url, (e, response, body) => {
-//   if (e) {
-//     console.error(e);
-//   }
-//   try {
-//     const $ = cheerio.load(body); //bodyの読み込み
-//     // console.log("body: ", body);
-//     // const $p = $("li");
-//     console.log("test", $);
-//     $("li").each((i, elem) => {
-//       // console.log("elm", elem);
-
-//       //'m_unit'クラス内のh3タグ内要素に対して処理実行
-//       titles_arr[i] = $(elem).text(); //配列にタイトルを挿入していく
-
-//       // console.log("titles_arr", titles_arr[2]);
-//     });
-//   } catch (e) {
-//     console.error(e);
-//   }
-// });
-
-const isMidi = (i, link) => {
-  // Return false if there is no href attribute.
-  if (typeof link.attribs.href === "undefined") {
-    return false;
-  }
-
-  return link.attribs.href.includes(".mid");
-};
-
 const app = express();
 
 app.get("/", (req, res) => res.send("Hello LINE BOT!(GET)")); //ブラウザ確認用(無くても問題ない)
 app.post("/webhook", line.middleware(config), (req, res) => {
-  console.log("ああああ", req.body.events[0].message.text);
-
-  //ここのif分はdeveloper consoleの"接続確認"用なので削除して問題ないです。
-  if (
-    req.body.events[0].replyToken === "00000000000000000000000000000000" &&
-    req.body.events[1].replyToken === "ffffffffffffffffffffffffffffffff"
-  ) {
-    res.send("Hello LINE BOT!(POST)");
-    console.log("疎通確認用");
-    return;
-  }
-
   Promise.all(req.body.events.map(handleEvent)).then((result) => {
     res.json(result);
     console.log("test", result);
@@ -96,8 +44,6 @@ async function handleEvent(event) {
   if (event.type !== "message" || event.message.type !== "text") {
     return Promise.resolve(null);
   }
-
-  console.log(event);
 
   let replyText = "";
   if (event.message.text === "こんにちは") {
@@ -114,9 +60,6 @@ async function handleEvent(event) {
       titles_arr.map((item) => item), //実際に返信の言葉を入れる箇所
   });
 }
-
-// app.listen(PORT);
-// console.log(`Server running at ${PORT}`);
 
 process.env.NOW_REGION ? (module.exports = app) : app.listen(PORT);
 console.log(`Server running at ${PORT}`);
